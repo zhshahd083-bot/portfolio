@@ -1,22 +1,38 @@
 import React, { memo, useMemo } from "react";
-import { Code, ExternalLink, FolderKanban } from "lucide-react";
+import {
+  Code2,
+  ExternalLink,
+  FolderKanban,
+  Sparkles,
+  Github,
+  Smartphone,
+  Cpu,
+  BrainCircuit,
+  Globe,
+  Database,
+  Wrench,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
-// --- Animation Variants (The "Staggered Entrance" Pattern) ---
-// This container will orchestrate the animation for the whole page
+// ======================================================
+// ANIMATIONS
+// ======================================================
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15, // Time delay between each child animating in
+      staggerChildren: 0.12,
     },
   },
 };
 
-// This variant will be used by each item in the container
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: {
+    opacity: 0,
+    y: 25,
+  },
   visible: {
     opacity: 1,
     y: 0,
@@ -27,104 +43,566 @@ const itemVariants = {
   },
 };
 
+// ======================================================
+// PROJECT CARD
+// ======================================================
 
-// --- Child Component (No changes needed) ---
 const ProjectCard = memo(({ project }) => {
   return (
-    // This card is now an item in the grid's stagger animation
     <motion.div
       variants={itemVariants}
-      className="bg-white/90 dark:bg-neutral-900/80 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow p-6 flex flex-col h-full"
+      whileHover={{
+        y: -6,
+      }}
+      transition={{
+        duration: 0.2,
+      }}
+      className={`
+        relative
+        group
+        bg-white/90
+        dark:bg-neutral-900/80
+        border
+        rounded-2xl
+        shadow
+        hover:shadow-xl
+        transition-all
+        duration-300
+        p-6
+        flex
+        flex-col
+        h-full
+        ${
+          project.featured
+            ? "border-primary/50 ring-1 ring-primary/20"
+            : "border-neutral-200 dark:border-neutral-700"
+        }
+      `}
     >
-      <h3 className="text-xl font-bold text-foreground mb-3 leading-tight">
+      {/* ==================================================
+          FEATURED BADGE
+      ================================================== */}
+
+      {project.featured && (
+        <div
+          className="
+            absolute
+            top-4
+            right-4
+            flex
+            items-center
+            gap-1.5
+            px-3
+            py-1
+            rounded-full
+            bg-primary/10
+            text-primary
+            border
+            border-primary/20
+            text-xs
+            font-semibold
+          "
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          Featured
+        </div>
+      )}
+
+      {/* ==================================================
+          CATEGORY ICON
+      ================================================== */}
+
+      <div className="flex items-center gap-3 mb-5">
+        <div
+          className="
+            w-11
+            h-11
+            flex
+            items-center
+            justify-center
+            rounded-xl
+            bg-neutral-100
+            dark:bg-neutral-800
+            text-primary
+            group-hover:scale-105
+            transition-transform
+          "
+        >
+          {project.icon}
+        </div>
+
+        <span
+          className="
+            text-xs
+            font-semibold
+            text-muted-foreground
+            uppercase
+            tracking-wide
+          "
+        >
+          {project.category}
+        </span>
+      </div>
+
+      {/* ==================================================
+          TITLE
+      ================================================== */}
+
+      <h3
+        className={`
+          text-xl
+          font-bold
+          text-foreground
+          mb-3
+          leading-tight
+          ${project.featured ? "pr-20" : ""}
+        `}
+      >
         {project.title}
       </h3>
-      <p className="text-base text-muted-foreground mb-4 flex-grow">
+
+      {/* ==================================================
+          DESCRIPTION
+      ================================================== */}
+
+      <p
+        className="
+          text-base
+          text-muted-foreground
+          leading-relaxed
+          mb-5
+          flex-grow
+        "
+      >
         {project.desc}
       </p>
-      <div className="flex flex-wrap gap-2 mb-5 mt-auto">
-        {project.tags.map((tag, tagIndex) => (
+
+      {/* ==================================================
+          TECHNOLOGIES
+      ================================================== */}
+
+      <div className="flex flex-wrap gap-2 mb-5">
+        {project.tags.map((tag, index) => (
           <span
-            key={tagIndex}
-            className="px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-600"
+            key={`${tag}-${index}`}
+            className="
+              px-3
+              py-1
+              rounded-full
+              text-xs
+              font-medium
+              bg-neutral-100
+              dark:bg-neutral-800
+              text-neutral-800
+              dark:text-neutral-200
+              border
+              border-neutral-300
+              dark:border-neutral-600
+              hover:bg-neutral-200
+              dark:hover:bg-neutral-700
+              transition-colors
+            "
           >
             {tag}
           </span>
         ))}
       </div>
-      <div className="flex gap-4 flex-wrap">
-        {project.links.map((link, linkIndex) => (
-          <a
-            key={linkIndex}
-            href={link.href}
-            className="flex items-center gap-2 text-primary font-semibold text-sm hover:underline hover:text-foreground dark:hover:text-primary-foreground/60 transition-colors duration-200"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {link.type === "code" ? (
-              <Code className="w-4 h-4" />
-            ) : (
-              <ExternalLink className="w-4 h-4" />
-            )}
-            {link.type === "code" ? "Code" : "Demo"}
-          </a>
-        ))}
-      </div>
+
+      {/* ==================================================
+          LINKS
+      ================================================== */}
+
+      {project.links && project.links.length > 0 && (
+        <div className="flex flex-wrap gap-4 mt-auto pt-2">
+          {project.links.map((link, index) => (
+            <a
+              key={`${link.label}-${index}`}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                flex
+                items-center
+                gap-2
+                text-primary
+                font-semibold
+                text-sm
+                hover:underline
+                transition-colors
+              "
+            >
+              {link.type === "github" ? (
+                <Github className="w-4 h-4" />
+              ) : (
+                <ExternalLink className="w-4 h-4" />
+              )}
+
+              {link.label}
+            </a>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 });
+
 ProjectCard.displayName = "ProjectCard";
 
+// ======================================================
+// PROJECTS DATA
+// ======================================================
 
-// --- Main Projects Component ---
-function ProjectsComponent() {
-  const projectsData = useMemo(
-    () => [
-      { title: "Text File Compressor", desc: "Built a robust, lossless text file compressor in C++ using the LZW algorithm, applying OOP and advanced algorithms. Achieved ~44% file size reduction on real-world files with efficient compression and decompression.", tags: ["C++", "LZW Algorithm", "OOPS"], links: [{ type: "code", href: "https://github.com/shashank2401/file-compressor-in-cpp" }] },
-      { title: "Pathfinding Visualizer", desc: "Interactive C++/SFML visualizer for Dijkstra's and A* algorithms. Features dynamic obstacles, diagonal movement, OOP, and optimized data structures for smooth, real-time animations.", tags: ["C++", "SFML", "Dijkstra's", "A*", "OOPS", "Data Structures"], links: [{ type: "code", href: "https://github.com/shashank2401/pathfinding-visualizer-in-cpp" }] },
-      { title: "Codeforces Visualizer", desc: "A minimal web app to view and compare Codeforces profiles. Shows key stats, rating history, and performance trends with clean visualizations. Built for fast, distraction-free, side-by-side comparisons.", tags: ["React", "Vite", "JavaScript", "Tailwind CSS", "Codeforces API"], links: [{ type: "demo", href: "https://cf-visualizer-rho.vercel.app" }, { type: "code", href: "https://github.com/shashank2401/cf-visualizer" }] },
-      { title: "GitHub Profile Visualizer", desc: "A dynamic app for exploring and comparing GitHub user profiles. Visualizes rich statistics, activity timelines, and repository insights, including a contribution heatmap. Supports side-by-side comparisons and offers both dark and light modes.", tags: ["React", "Vite", "JavaScript", "Tailwind CSS", "GitHub API"], links: [{ type: "demo", href: "https://github-profile-visualizer-six.vercel.app/" }, { type: "code", href: "https://github.com/shashank2401/github-profile-visualizer" }] },
-      { title: "Weather App", desc: "A sleek, responsive weather application delivering real-time weather updates for any city. Features location-based forecasts, intuitive search suggestions, and seamless toggling between Celsius and Fahrenheit.", tags: ["HTML", "CSS", "JavaScript", "Weather API", "Responsive Design"], links: [{ type: "demo", href: "https://weather-app-zeta-three-62.vercel.app/" }, { type: "code", href: "https://github.com/shashank2401/weather-app" }] },
-      { title: "Soil-Water Characteristic Curve Prediction", desc: "Used Artificial Neural Networks (ANNs) to predict SWCC parameters from soil properties for plastic soils. Improved geotechnical prediction for slope stability and foundation design.", tags: ["Python", "TensorFlow", "ANN", "Soil Mechanics", "Data Analysis"], links: [{ type: "code", href: "https://github.com/shashank2401/swcc-prediction-using-ann" }] },
+const PROJECTS_DATA = [
+
+  // ====================================================
+  // 1. FINAL YEAR PROJECT
+  // ====================================================
+
+  {
+    title: "AI Recruitment Platform",
+    category: "Artificial Intelligence · PFE",
+    featured: true,
+
+    icon: <BrainCircuit className="w-5 h-5" />,
+
+    desc:
+      "An intelligent recruitment platform designed to automatically analyze candidate CVs using Artificial Intelligence and Large Language Models. The system extracts information from PDF documents and scanned images, analyzes candidate skills and experience, generates a candidate score and provides AI-based feedback to recruiters.",
+
+    tags: [
+      "Python",
+      "FastAPI",
+      "React",
+      "JavaScript",
+      "LLM",
+      "LLaMA",
+      "OCR",
+      "Docker",
+      "SQLite",
+      "SQLAlchemy",
+      "REST API",
+      "JWT",
     ],
-    []
-  );
+
+    links: [
+      // Add your GitHub / Demo later
+      // {
+      //   type: "github",
+      //   label: "GitHub",
+      //   href: "YOUR_GITHUB_LINK",
+      // },
+    ],
+  },
+
+  // ====================================================
+  // 2. LEONI EMPLOYEE MANAGEMENT
+  // ====================================================
+
+  {
+    title: "Employee Management Web Application",
+    category: "Web Development · Internship",
+
+    icon: <Globe className="w-5 h-5" />,
+
+    desc:
+      "A web application developed during my technical internship at LEONI for managing employee information and simplifying employee management processes through a digital interface.",
+
+    tags: [
+      "Web Development",
+      "JavaScript",
+      "HTML",
+      "CSS",
+      "Database",
+      "UI/UX",
+    ],
+
+    links: [],
+  },
+
+  // ====================================================
+  // 3. SUSHI BAR
+  // ====================================================
+
+  {
+    title: "Sushi Bar Website",
+    category: "Web Development",
+
+    icon: <Globe className="w-5 h-5" />,
+
+    desc:
+      "A modern and responsive website designed for a Sushi Bar. The project focuses on presenting the restaurant, its services and menu through an attractive and intuitive user interface.",
+
+    tags: [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Responsive Design",
+      "UI/UX",
+      "Web Development",
+    ],
+
+    links: [],
+  },
+
+  // ====================================================
+  // 4. PARAPHARMACY
+  // ====================================================
+
+  {
+    title: "Parapharmacy Website",
+    category: "Web Development",
+
+    icon: <Globe className="w-5 h-5" />,
+
+    desc:
+      "A responsive web platform created for a parapharmacy to present products and services through a clean, organized and user-friendly digital experience.",
+
+    tags: [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Responsive Design",
+      "UI/UX",
+      "Web Development",
+    ],
+
+    links: [],
+  },
+
+  // ====================================================
+  // 5. TO-DO LIST
+  // ====================================================
+
+  {
+    title: "To-Do List Application",
+    category: "Python Application",
+
+    icon: <Code2 className="w-5 h-5" />,
+
+    desc:
+      "A Python-based task management application designed to organize and manage daily tasks while practicing programming fundamentals, application logic and data management.",
+
+    tags: [
+      "Python",
+      "CRUD",
+      "Task Management",
+      "Data Management",
+      "Problem Solving",
+    ],
+
+    links: [],
+  },
+
+  // ====================================================
+  // 6. HOME INVENTORY
+  // ====================================================
+
+  {
+    title: "Home Inventory App",
+    category: "Mobile Application · Android",
+
+    icon: <Smartphone className="w-5 h-5" />,
+
+    desc:
+      "A mobile application developed with Android Studio for managing and organizing household inventory. The application provides a practical way to keep track of household items and their information.",
+
+    tags: [
+      "Android Studio",
+      "Android",
+      "Mobile Development",
+      "Java",
+      "UI/UX",
+      "SQLite",
+    ],
+
+    links: [],
+  },
+
+  // ====================================================
+  // 7. GREEN CHECK
+  // ====================================================
+
+  {
+    title: "Green Check",
+    category: "IoT · Robotics",
+
+    icon: <Cpu className="w-5 h-5" />,
+
+    desc:
+      "An IoT and robotics project dedicated to detecting anomalies in agricultural environments. The project combines connected technologies, sensors and robotics concepts to support agricultural monitoring.",
+
+    tags: [
+      "IoT",
+      "Robotics",
+      "Embedded Systems",
+      "Sensors",
+      "Agriculture",
+      "Monitoring",
+    ],
+
+    links: [],
+  },
+
+  // ====================================================
+  // 8. SMART QUEUE ASSISTANT
+  // ====================================================
+
+  {
+    title: "Smart Queue Assistant",
+    category: "Intelligent System · Mobile",
+
+    icon: <BrainCircuit className="w-5 h-5" />,
+
+    desc:
+      "An intelligent queue management system designed to improve the management of waiting lines. The solution includes a mobile application and real-time monitoring to provide a more efficient and organized queue experience.",
+
+    tags: [
+      "Smart System",
+      "Mobile Application",
+      "Real-Time",
+      "IoT",
+      "Artificial Intelligence",
+      "System Design",
+    ],
+
+    links: [],
+  },
+
+  // ====================================================
+  // 9. EDURATE
+  // ====================================================
+
+  {
+    title: "EduRate",
+    category: "Web Platform",
+
+    icon: <Database className="w-5 h-5" />,
+
+    desc:
+      "A collaborative web platform dedicated to academic evaluation. The project aims to provide a digital environment for managing and sharing academic assessments in a collaborative way.",
+
+    tags: [
+      "Web Development",
+      "React",
+      "JavaScript",
+      "Collaborative Platform",
+      "Database",
+      "UI/UX",
+    ],
+
+    links: [],
+  },
+];
+
+// ======================================================
+// MAIN COMPONENT
+// ======================================================
+
+function ProjectsComponent() {
+  const projectsData = useMemo(() => PROJECTS_DATA, []);
 
   return (
-    <div className="w-full min-h-[80vh] flex flex-col items-center justify-center px-4 py-12">
-      {/* 1. This is the SINGLE animation container for the whole page. */}
-      {/* It uses `animate`, not `whileInView`, for guaranteed execution. */}
+    <div
+      className="
+        w-full
+        min-h-[80vh]
+        flex
+        flex-col
+        items-center
+        justify-center
+        px-4
+        py-12
+      "
+    >
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="flex flex-col items-center w-full"
       >
-        {/* Item 1: The header text block */}
-        <motion.div variants={itemVariants} className="flex flex-col items-center text-center">
-            <h2 className="text-4xl sm:text-5xl font-bold text-center mb-4 flex items-center gap-4 text-foreground">
-                <FolderKanban className="w-8 h-8 sm:w-11 sm:h-11 text-primary drop-shadow-sm" />
-                Projects
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-center mb-10">
-                Here are some of the projects I've worked on, ranging from algorithm visualizers and utilities to frontend tools and machine learning models. Each project reflects my passion for clean design, efficient problem-solving, and practical implementation.
-            </p>
+
+        {/* ==================================================
+            HEADER
+        ================================================== */}
+
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col items-center text-center"
+        >
+          <h2
+            className="
+              text-4xl
+              sm:text-5xl
+              font-bold
+              mb-4
+              flex
+              items-center
+              gap-4
+              text-foreground
+            "
+          >
+            <FolderKanban
+              className="
+                w-8
+                h-8
+                sm:w-11
+                sm:h-11
+                text-primary
+                drop-shadow-sm
+              "
+            />
+
+            Projects
+          </h2>
+
+          <p
+            className="
+              text-lg
+              text-muted-foreground
+              max-w-2xl
+              mx-auto
+              text-center
+              mb-10
+              leading-relaxed
+            "
+          >
+            A selection of projects I have developed across Artificial
+            Intelligence, Web Development, Mobile Applications, IoT and
+            intelligent systems. Each project reflects my interest in
+            building practical and innovative digital solutions.
+          </p>
         </motion.div>
 
-        {/* Item 2: The entire project card grid animates in as one block... */}
+        {/* ==================================================
+            PROJECT GRID
+        ================================================== */}
+
         <motion.div
-          // It is ALSO a container for its own children (the cards)
           variants={containerVariants}
-          className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="
+            w-full
+            max-w-6xl
+            grid
+            grid-cols-1
+            md:grid-cols-2
+            lg:grid-cols-3
+            gap-8
+          "
         >
           {projectsData.map((project, index) => (
-            <ProjectCard key={index} project={project} />
+            <ProjectCard
+              key={`${project.title}-${index}`}
+              project={project}
+            />
           ))}
         </motion.div>
+
       </motion.div>
     </div>
   );
 }
 
-// Export the memoized component in a standard way
+// ======================================================
+// EXPORT
+// ======================================================
+
 export default memo(ProjectsComponent);
